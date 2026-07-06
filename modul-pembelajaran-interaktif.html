@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modul Interaktif: Membaca, Berfikir &amp; Membuat Nota</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink-900:#14213D;
+  --ink-800:#1F3157;
+  --ink-700:#2A4272;
+  --paper:#FAF7F0;
+  --paper-dim:#F1ECDF;
+  --gold:#C08A28;
+  --gold-soft:#EBD9AE;
+  --teal:#3E7C74;
+  --teal-soft:#D9EAE6;
+  --rust:#A8433A;
+  --rust-soft:#F1DAD6;
+  --pencil:#6B6558;
+  --line:#DCD5C2;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:'Work Sans',sans-serif;
+  background:var(--paper);
+  color:var(--ink-900);
+  line-height:1.6;
+}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--gold);
+  font-weight:600;
+}
+h1,h2,h3{font-family:'Fraunces',serif;margin:0;color:var(--ink-900);}
+.margin-note{
+  font-family:'Caveat',cursive;
+  color:var(--gold);
+  font-size:19px;
+  line-height:1.25;
+}
+
+/* LAYOUT */
+.shell{display:flex;min-height:100vh;}
+.sidebar{
+  width:250px;
+  flex-shrink:0;
+  background:var(--ink-900);
+  color:var(--paper);
+  padding:28px 20px;
+  position:sticky;
+  top:0;
+  height:100vh;
+  overflow-y:auto;
+}
+.sidebar .brand{
+  font-family:'Fraunces',serif;
+  font-size:20px;
+  font-style:italic;
+  color:var(--paper);
+  margin-bottom:6px;
+}
+.sidebar .brand-sub{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  color:var(--gold-soft);
+  letter-spacing:.08em;
+  margin-bottom:28px;
+  display:block;
+}
+.navlink{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  width:100%;
+  text-align:left;
+  background:none;
+  border:none;
+  color:var(--paper);
+  opacity:.65;
+  font-family:'Work Sans',sans-serif;
+  font-size:14.5px;
+  font-weight:500;
+  padding:11px 10px;
+  border-radius:6px;
+  cursor:pointer;
+  margin-bottom:2px;
+}
+.navlink .num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gold);}
+.navlink:hover{opacity:.9;background:rgba(255,255,255,.05);}
+.navlink.active{opacity:1;background:rgba(255,255,255,.08);border-left:2px solid var(--gold);}
+.progress-wrap{margin-top:26px;padding-top:18px;border-top:1px solid rgba(255,255,255,.15);}
+.progress-label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--gold-soft);letter-spacing:.08em;margin-bottom:8px;display:block;}
+.progress-track{height:6px;background:rgba(255,255,255,.15);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--gold);width:16%;transition:width .4s ease;}
+
+.main{flex:1;padding:0;max-width:100%;overflow-x:hidden;}
+.page{display:none;padding:56px 64px 90px;max-width:920px;}
+.page.active{display:block;}
+.pill{
+  display:inline-block;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--ink-800);
+  background:var(--gold-soft);
+  padding:5px 12px;
+  border-radius:20px;
+  margin-bottom:16px;
+}
+.lead{font-size:17px;color:var(--pencil);max-width:640px;}
+hr.rule{border:none;border-top:1px solid var(--line);margin:40px 0;}
+
+/* HERO */
+.hero{background:var(--ink-900);color:var(--paper);padding:70px 64px 60px;}
+.hero h1{color:var(--paper);font-size:40px;line-height:1.15;max-width:680px;}
+.hero .lead{color:#C9CFDD;}
+.hero-objectives{
+  margin-top:34px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+}
+.obj-card{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;
+  padding:16px 18px;
+}
+.obj-card .k{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gold);margin-bottom:6px;display:block;}
+.obj-card p{margin:0;font-size:13.5px;color:#E4E7EF;}
+
+/* CARDS */
+.card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:26px 28px;
+  margin-bottom:22px;
+}
+.card h3{font-size:20px;margin-bottom:8px;}
+.card .desc{color:var(--pencil);font-size:14.5px;margin-bottom:16px;}
+
+/* TABS */
+.tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+.tab-btn{
+  font-family:'Work Sans',sans-serif;
+  font-weight:600;
+  font-size:13.5px;
+  padding:9px 16px;
+  border-radius:8px;
+  border:1px solid var(--line);
+  background:var(--paper);
+  color:var(--ink-800);
+  cursor:pointer;
+}
+.tab-btn.active{background:var(--ink-900);color:var(--paper);border-color:var(--ink-900);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* PETIKAN */
+.petikan-box{
+  background:var(--paper-dim);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:24px 26px;
+  position:relative;
+}
+.petikan-box .tag{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--pencil);margin-bottom:12px;display:block;}
+.petikan-box p{font-size:15.5px;margin:0 0 14px;}
+.petikan-box p:last-child{margin-bottom:0;}
+.s-detail{cursor:pointer;border-bottom:1px dashed var(--gold);transition:opacity .2s;}
+.mode-imbasan .s-detail{opacity:.3;}
+.mode-imbasan .s-main{background:var(--gold-soft);border-radius:3px;padding:0 2px;font-weight:600;}
+.mode-teliti .s-main{background:none;font-weight:600;}
+.mode-teliti .s-detail:hover{background:var(--teal-soft);}
+.annot{
+  display:none;
+  margin-top:6px;
+  font-family:'Caveat',cursive;
+  font-size:18px;
+  color:var(--teal);
+  background:var(--teal-soft);
+  padding:6px 12px;
+  border-radius:8px;
+}
+.annot.show{display:inline-block;}
+.mode-toggle{display:flex;gap:8px;margin-bottom:14px;}
+
+/* MIND MAP */
+.mindmap{position:relative;min-height:340px;background:var(--paper-dim);border-radius:12px;border:1px solid var(--line);padding:30px;}
+.mm-center{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  background:var(--ink-900);color:#fff;font-weight:600;font-size:14px;
+  padding:16px 20px;border-radius:50%;width:140px;height:140px;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  font-family:'Fraunces',serif;box-shadow:0 6px 18px rgba(20,33,61,.25);
+}
+.mm-node{
+  position:absolute;background:#fff;border:2px solid var(--gold);border-radius:10px;
+  padding:10px 14px;font-size:13px;font-weight:600;cursor:pointer;max-width:150px;
+  text-align:center;transition:all .2s;
+}
+.mm-node .body{display:none;font-weight:400;font-size:12.5px;color:var(--pencil);margin-top:6px;}
+.mm-node.open .body{display:block;}
+.mm-node.open{border-color:var(--teal);background:var(--teal-soft);}
+
+/* CORNELL */
+.cornell{display:grid;grid-template-columns:1fr 2fr;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+.cornell-cue,.cornell-note{padding:16px 18px;min-height:180px;}
+.cornell-cue{background:var(--gold-soft);border-right:1px solid var(--line);}
+.cornell-note{background:#fff;}
+.cornell-summary{grid-column:1/-1;background:var(--teal-soft);padding:16px 18px;border-top:1px solid var(--line);}
+.cornell [contenteditable]{outline:none;border-bottom:1px dotted var(--pencil);}
+.cornell label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--pencil);display:block;margin-bottom:8px;}
+
+/* SORT ACTIVITY */
+.chip-pool{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
+.chip{
+  background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:13.5px;
+  display:flex;align-items:center;gap:10px;
+}
+.chip.done-plus{border-color:var(--teal);background:var(--teal-soft);}
+.chip.done-minus{border-color:var(--rust);background:var(--rust-soft);}
+.chip button{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;border:1px solid var(--line);background:var(--paper);
+  border-radius:5px;padding:3px 7px;cursor:pointer;
+}
+.sort-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.sort-col{border-radius:10px;padding:14px;min-height:120px;}
+.sort-col.plus{background:var(--teal-soft);}
+.sort-col.minus{background:var(--rust-soft);}
+.sort-col h4{margin:0 0 10px;font-size:13px;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.05em;}
+.sort-item{background:#fff;border-radius:6px;padding:8px 10px;font-size:13.5px;margin-bottom:6px;}
+
+/* INFERENS */
+.infer-item{border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin-bottom:12px;}
+.infer-q{font-weight:600;font-size:14.5px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
+.infer-a{display:none;margin-top:10px;font-size:14px;color:var(--ink-800);background:var(--teal-soft);padding:10px 14px;border-radius:8px;}
+.infer-item.open .infer-a{display:block;}
+.infer-item .arrow{font-family:'IBM Plex Mono',monospace;color:var(--gold);}
+
+/* BUBBLE MAP */
+.bubble-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.bubble{
+  aspect-ratio:1;border-radius:50%;border:2px solid var(--gold);background:#fff;
+  display:flex;align-items:center;justify-content:center;text-align:center;padding:14px;
+  font-size:13px;cursor:pointer;font-weight:600;color:var(--ink-800);
+}
+.bubble.revealed{background:var(--gold-soft);font-weight:400;font-size:12.5px;}
+.bubble-center{grid-column:2;background:var(--ink-900);color:#fff;border-color:var(--ink-900);font-family:'Fraunces',serif;font-size:14px;}
+
+/* PMI */
+.pmi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.pmi-col{border-radius:10px;padding:14px;}
+.pmi-col.plus{background:var(--teal-soft);}
+.pmi-col.minus{background:var(--rust-soft);}
+.pmi-col.interesting{background:var(--gold-soft);}
+.pmi-col h4{font-family:'IBM Plex Mono',monospace;font-size:12px;text-transform:uppercase;margin:0 0 10px;}
+.pmi-line{background:#fff;border-radius:6px;padding:7px 10px;font-size:13px;margin-bottom:6px;min-height:20px;}
+.pmi-line[contenteditable]:empty:before{content:'Tulis di sini…';color:#aaa;}
+.pmi-add{font-family:'IBM Plex Mono',monospace;font-size:11px;border:1px dashed var(--pencil);background:none;border-radius:6px;padding:5px 10px;cursor:pointer;margin-top:4px;}
+
+/* QUIZ */
+.quiz-q{border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:14px;background:#fff;}
+.quiz-q .qtext{font-weight:600;margin-bottom:10px;font-size:14.5px;}
+.quiz-opt{display:block;padding:8px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:7px;cursor:pointer;font-size:14px;}
+.quiz-opt:hover{background:var(--paper-dim);}
+.quiz-opt input{margin-right:8px;}
+.quiz-opt.correct{background:var(--teal-soft);border-color:var(--teal);}
+.quiz-opt.wrong{background:var(--rust-soft);border-color:var(--rust);}
+.quiz-feedback{font-size:13px;margin-top:8px;font-style:italic;color:var(--pencil);display:none;}
+.quiz-feedback.show{display:block;}
+.btn{
+  font-family:'Work Sans',sans-serif;font-weight:600;font-size:14px;color:#fff;
+  background:var(--ink-900);border:none;border-radius:8px;padding:12px 22px;cursor:pointer;
+}
+.btn.gold{background:var(--gold);color:var(--ink-900);}
+.score-box{display:none;text-align:center;padding:26px;background:var(--ink-900);color:#fff;border-radius:12px;margin-top:18px;}
+.score-box.show{display:block;}
+.score-box .big{font-family:'Fraunces',serif;font-size:38px;color:var(--gold-soft);}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+textarea.reflect{width:100%;min-height:110px;border:1px solid var(--line);border-radius:8px;padding:12px;font-family:'Work Sans',sans-serif;font-size:14px;resize:vertical;}
+.kriteria-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13.5px;}
+.kriteria-table th,.kriteria-table td{border:1px solid var(--line);padding:10px 12px;text-align:left;}
+.kriteria-table th{background:var(--ink-900);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;}
+
+@media (max-width:860px){
+  .shell{flex-direction:column;}
+  .sidebar{width:100%;height:auto;position:relative;display:flex;overflow-x:auto;padding:16px;gap:4px;}
+  .sidebar .brand,.sidebar .brand-sub,.progress-wrap{display:none;}
+  .navlink{white-space:nowrap;}
+  .page{padding:34px 20px 70px;}
+  .hero{padding:40px 20px;}
+  .hero-objectives,.two-col,.pmi-grid,.sort-cols,.bubble-grid{grid-template-columns:1fr;}
+  .cornell{grid-template-columns:1fr;}
+  .cornell-cue{border-right:none;border-bottom:1px solid var(--line);}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="sidebar">
+    <span class="brand">Nota &amp; Fikir</span>
+    <span class="brand-sub">MODUL BAHASA MELAYU · KPPB</span>
+    <button class="navlink active" data-page="beranda"><span class="num">00</span> Beranda</button>
+    <button class="navlink" data-page="topik3"><span class="num">01</span> Membaca &amp; Membuat Nota</button>
+    <button class="navlink" data-page="topik4"><span class="num">02</span> Kemahiran Berfikir</button>
+    <button class="navlink" data-page="topik5"><span class="num">03</span> Alat Berfikir</button>
+    <button class="navlink" data-page="aktiviti"><span class="num">04</span> Aktiviti &amp; Kuiz</button>
+    <button class="navlink" data-page="rumusan"><span class="num">05</span> Rumusan &amp; Refleksi</button>
+    <div class="progress-wrap">
+      <span class="progress-label">KEMAJUAN ANDA</span>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <!-- BERANDA -->
+    <section class="page active" id="page-beranda">
+      <div class="hero">
+        <span class="eyebrow">Modul Pembelajaran Interaktif</span>
+        <h1>Membaca dengan Mata, Berfikir dengan Minda, Mencatat dengan Tangan.</h1>
+        <p class="lead">Modul ini mengintegrasikan kemahiran membaca, kemahiran berfikir dan alat berfikir melalui satu petikan sebenar bertajuk <em>"Kesan Penggunaan Media Sosial dalam Kalangan Remaja"</em> — isu yang dekat dengan kehidupan anda sendiri.</p>
+        <div class="hero-objectives">
+          <div class="obj-card"><span class="k">TOPIK 3</span><p>2 kaedah membaca &amp; 3 teknik membuat nota diaplikasikan pada petikan sebenar.</p></div>
+          <div class="obj-card"><span class="k">TOPIK 4</span><p>2 kemahiran berfikir kritis dilatih melalui aktiviti menyusun dan membuat inferens.</p></div>
+          <div class="obj-card"><span class="k">TOPIK 5</span><p>2 alat berfikir digital — Peta Buih dan PMI — digunakan untuk merangka idea.</p></div>
+        </div>
+      </div>
+
+      <div style="padding:44px 64px 0;max-width:820px;">
+        <h3 style="margin-bottom:14px;">Apa yang akan anda lakukan?</h3>
+        <p class="lead" style="margin-bottom:24px;">Modul ini berpusatkan pelajar — anda akan membaca, mengklik, menyusun, mengisi dan membuat keputusan sendiri di setiap bahagian, bukan sekadar membaca teori.</p>
+        <table class="kriteria-table">
+          <tr><th>Kriteria KPPB</th><th>Bagaimana modul ini menerapkannya</th></tr>
+          <tr><td>C1 &nbsp;Sahsiah</td><td>Petikan dan aktiviti dikaitkan terus dengan kehidupan harian remaja pengguna media sosial.</td></tr>
+          <tr><td>C4 &nbsp;Komunikasi</td><td>Nota Cornell dan PMI dihasilkan daripada hasil pemikiran dan perbincangan anda sendiri.</td></tr>
+          <tr><td>C5 &nbsp;Pemikiran Kritis</td><td>Aktiviti membanding-beza dan inferens merangsang penyelesaian isu sebenar.</td></tr>
+          <tr><td>C6 &nbsp;Kreativiti</td><td>Peta Minda dan Peta Buih membenarkan anda menjana idea mengikut cara berfikir sendiri.</td></tr>
+        </table>
+        <p style="margin-top:26px;"><button class="btn gold" onclick="goPage('topik3')">Mula Belajar →</button></p>
+      </div>
+    </section>
+
+    <!-- TOPIK 3 -->
+    <section class="page" id="page-topik3">
+      <span class="pill">Topik 3</span>
+      <h2>Kemahiran Membaca &amp; Membuat Nota</h2>
+      <p class="lead">Baca petikan di bawah menggunakan dua kaedah membaca, kemudian cuba tiga teknik membuat nota terhadap kandungan yang sama.</p>
+
+      <hr class="rule">
+      <h3 style="font-size:18px;margin-bottom:10px;">A. Kaedah Membaca</h3>
+      <p class="desc">Tukar mod di bawah untuk merasai perbezaan antara membaca imbasan dan membaca teliti pada petikan yang sama.</p>
+      <div class="mode-toggle">
+        <button class="tab-btn active" id="btn-imbasan" onclick="setReadMode('imbasan')">🔍 Mod Imbasan (Skimming)</button>
+        <button class="tab-btn" id="btn-teliti" onclick="setReadMode('teliti')">📖 Mod Teliti (Intensif)</button>
+      </div>
+      <div class="petikan-box mode-imbasan" id="petikanBox">
+        <span class="tag">PETIKAN · Kesan Penggunaan Media Sosial dalam Kalangan Remaja</span>
+        <p><span class="s-main">Media sosial telah menjadi sebahagian daripada kehidupan harian remaja masa kini.</span> <span class="s-detail" onclick="toggleAnnot(this)">Aplikasi seperti TikTok, Instagram dan Threads bukan sahaja digunakan untuk berhibur, malah menjadi ruang untuk berkongsi idea, membina jaringan sosial dan mendapatkan maklumat semasa.</span><span class="annot">butiran: contoh aplikasi &amp; fungsi</span> <span class="s-detail" onclick="toggleAnnot(this)">Walau bagaimanapun, penggunaan media sosial yang tidak terkawal boleh mendatangkan pelbagai kesan negatif, terutamanya terhadap kesihatan mental dan pencapaian akademik remaja.</span><span class="annot">butiran: petanda beralih kepada kesan negatif</span></p>
+        <p><span class="s-main">Kajian oleh beberapa badan kesihatan mendapati bahawa remaja yang menghabiskan lebih daripada empat jam sehari di media sosial berisiko mengalami kebimbangan, gangguan tumpuan dan masalah tidur.</span> <span class="s-detail" onclick="toggleAnnot(this)">Selain itu, budaya membanding diri dengan kehidupan orang lain yang dipaparkan di media sosial turut menyumbang kepada rasa rendah diri dalam kalangan remaja.</span><span class="annot">butiran: sebab tambahan — budaya banding diri</span></p>
+        <p><span class="s-main">Namun, media sosial juga membawa manfaat sekiranya digunakan secara bijak.</span> <span class="s-detail" onclick="toggleAnnot(this)">Ramai remaja kini menggunakan platform ini untuk berkongsi kandungan pendidikan, menyertai komuniti pembelajaran dalam talian dan mengasah kemahiran kreatif seperti penulisan, fotografi dan penyuntingan video.</span><span class="annot">butiran: contoh manfaat positif</span> <span class="s-main">Oleh itu, keseimbangan dan literasi digital menjadi kunci utama supaya remaja dapat memanfaatkan media sosial tanpa terjejas kesejahteraan diri.</span></p>
+      </div>
+      <p class="margin-note" style="margin-top:10px;">✎ Perasan? Dalam mod imbasan, hanya idea utama kelihatan jelas — itulah gunanya untuk cari gambaran cepat!</p>
+
+      <hr class="rule">
+      <h3 style="font-size:18px;margin-bottom:6px;">B. Teknik Membuat Nota</h3>
+      <p class="desc">Cuba tiga teknik ini menggunakan petikan yang sama di atas.</p>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="setTab(this,'nota-peta')">🧠 Peta Minda</button>
+        <button class="tab-btn" onclick="setTab(this,'nota-cornell')">🗂️ Kaedah Cornell</button>
+        <button class="tab-btn" onclick="setTab(this,'nota-akronim')">🔤 Akronim</button>
+      </div>
+
+      <div class="tab-panel active" id="nota-peta">
+        <div class="mindmap" id="mindmapArea"></div>
+      </div>
+
+      <div class="tab-panel" id="nota-cornell">
+        <div class="cornell">
+          <div class="cornell-cue">
+            <label>Isyarat / Soalan</label>
+            <div contenteditable="true">Apakah 2 kesan negatif media sosial?</div><br>
+            <div contenteditable="true">Apakah manfaat jika digunakan bijak?</div>
+          </div>
+          <div class="cornell-note">
+            <label>Nota Terperinci</label>
+            <div contenteditable="true">• Kebimbangan, gangguan tumpuan, masalah tidur (&gt;4 jam sehari)<br>• Budaya banding diri → rasa rendah diri<br>• Manfaat: kandungan pendidikan, komuniti pembelajaran, kemahiran kreatif</div>
+          </div>
+          <div class="cornell-summary">
+            <label>Rumusan (tulis dengan ayat sendiri)</label>
+            <div contenteditable="true" style="min-height:40px;">Klik dan cuba tulis rumusan anda sendiri di sini…</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="nota-akronim">
+        <div class="card" style="margin-bottom:14px;">
+          <h3 style="font-size:16px;">Contoh: Akronim <span style="color:var(--gold)">S.I.H.A.T.</span></h3>
+          <p class="desc" style="margin-bottom:0;">Cara mengingat langkah guna media sosial secara sihat:</p>
+          <p style="font-size:14.5px;line-height:1.9;margin-top:10px;">
+            <strong>S</strong>eimbangkan masa skrin<br>
+            <strong>I</strong>khtiar kawal notifikasi<br>
+            <strong>H</strong>ormati privasi diri &amp; orang lain<br>
+            <strong>A</strong>malkan tapisan kandungan<br>
+            <strong>T</strong>enang &amp; tidur yang cukup
+          </p>
+        </div>
+        <div class="card" style="margin-bottom:0;">
+          <h3 style="font-size:16px;">Cuba sendiri</h3>
+          <p class="desc">Cipta akronim anda sendiri untuk mengingat idea utama petikan (contoh: gunakan huruf pertama perkataan penting).</p>
+          <input type="text" placeholder="Taip akronim anda di sini…" style="width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:8px;font-family:'Work Sans';font-size:14px;">
+        </div>
+      </div>
+    </section>
+
+    <!-- TOPIK 4 -->
+    <section class="page" id="page-topik4">
+      <span class="pill">Topik 4</span>
+      <h2>Kemahiran Berfikir</h2>
+      <p class="lead">Dua kemahiran berfikir kritis dilatih di sini: membanding &amp; membeza, serta membuat inferens — kedua-duanya berdasarkan petikan yang sama.</p>
+
+      <hr class="rule">
+      <h3 style="font-size:18px;">A. Kemahiran Membanding &amp; Membeza</h3>
+      <p class="desc">Klik butang + atau − pada setiap kenyataan untuk mengasingkannya sebagai kesan positif atau negatif. Jawapan akan disemak serta-merta.</p>
+      <div class="chip-pool" id="chipPool">
+        <div class="chip" data-answer="minus">Risiko kebimbangan &amp; gangguan tumpuan <button onclick="sortChip(this,'plus')">+</button><button onclick="sortChip(this,'minus')">−</button></div>
+        <div class="chip" data-answer="minus">Budaya banding diri menyebabkan rasa rendah diri <button onclick="sortChip(this,'plus')">+</button><button onclick="sortChip(this,'minus')">−</button></div>
+        <div class="chip" data-answer="plus">Ruang berkongsi kandungan pendidikan <button onclick="sortChip(this,'plus')">+</button><button onclick="sortChip(this,'minus')">−</button></div>
+        <div class="chip" data-answer="plus">Mengasah kemahiran kreatif seperti fotografi &amp; penulisan <button onclick="sortChip(this,'plus')">+</button><button onclick="sortChip(this,'minus')">−</button></div>
+        <div class="chip" data-answer="minus">Gangguan tidur akibat penggunaan berlebihan <button onclick="sortChip(this,'plus')">+</button><button onclick="sortChip(this,'minus')">−</button></div>
+        <div class="chip" data-answer="plus">Membina jaringan sosial &amp; komuniti pembelajaran <button onclick="sortChip(this,'plus')">+</button><button onclick="sortChip(this,'minus')">−</button></div>
+      </div>
+
+      <hr class="rule">
+      <h3 style="font-size:18px;">B. Kemahiran Membuat Inferens</h3>
+      <p class="desc">Klik setiap soalan untuk memikirkan jawapan dahulu, kemudian dedahkan cadangan inferens.</p>
+
+      <div class="infer-item" onclick="this.classList.toggle('open')">
+        <div class="infer-q">Mengapakah remaja yang membanding diri di media sosial berasa rendah diri? <span class="arrow">[buka]</span></div>
+        <div class="infer-a">Kandungan yang dipaparkan biasanya dipilih dan disunting untuk kelihatan sempurna, jadi perbandingan yang dibuat tidak adil dan tidak menggambarkan realiti sebenar kehidupan orang lain.</div>
+      </div>
+      <div class="infer-item" onclick="this.classList.toggle('open')">
+        <div class="infer-q">Mengapakah "literasi digital" penting disebut sebagai kunci utama dalam petikan? <span class="arrow">[buka]</span></div>
+        <div class="infer-a">Kerana media sosial itu sendiri neutral — kesannya (baik atau buruk) bergantung kepada cara dan sikap penggunanya, bukan pada teknologi itu semata-mata.</div>
+      </div>
+      <div class="infer-item" onclick="this.classList.toggle('open')">
+        <div class="infer-q">Apakah yang tersirat tentang sikap penulis petikan ini — memihak sepenuhnya kepada media sosial, menentangnya, atau seimbang? <span class="arrow">[buka]</span></div>
+        <div class="infer-a">Seimbang. Penulis mengakui risiko dan manfaat secara sama rata, dan mencadangkan penyelesaian (keseimbangan &amp; literasi digital) bukan larangan mutlak.</div>
+      </div>
+    </section>
+
+    <!-- TOPIK 5 -->
+    <section class="page" id="page-topik5">
+      <span class="pill">Topik 5</span>
+      <h2>Alat-Alat Kemahiran Berfikir</h2>
+      <p class="lead">Dua alat berfikir digunakan untuk menyusun idea daripada petikan secara visual: Peta Buih dan PMI.</p>
+
+      <hr class="rule">
+      <h3 style="font-size:18px;">A. Peta Buih (i-Think)</h3>
+      <p class="desc">Klik setiap gelembung untuk mendedahkan ciri/kesan media sosial yang berkaitan.</p>
+      <div class="bubble-grid">
+        <div class="bubble" onclick="revealBubble(this,'Kandungan pendidikan &amp; kreatif')">?</div>
+        <div class="bubble bubble-center">Media<br>Sosial</div>
+        <div class="bubble" onclick="revealBubble(this,'Jaringan sosial &amp; komuniti')">?</div>
+        <div class="bubble" onclick="revealBubble(this,'Kebimbangan &amp; gangguan tumpuan')">?</div>
+        <div class="bubble" onclick="revealBubble(this,'Rasa rendah diri (banding-banding)')">?</div>
+        <div class="bubble" onclick="revealBubble(this,'Masalah tidur')">?</div>
+      </div>
+
+      <hr class="rule">
+      <h3 style="font-size:18px;">B. Alat PMI (Plus – Minus – Interesting)</h3>
+      <p class="desc">Contoh diberikan; klik "+ Tambah" untuk menambah pandangan sendiri pada setiap lajur.</p>
+      <div class="pmi-grid">
+        <div class="pmi-col plus">
+          <h4>Plus (+)</h4>
+          <div id="pmiPlus">
+            <div class="pmi-line" contenteditable="true">Peluang belajar &amp; berkreativiti</div>
+            <div class="pmi-line" contenteditable="true">Memperluas jaringan sosial</div>
+          </div>
+          <button class="pmi-add" onclick="addPMI('pmiPlus')">+ Tambah</button>
+        </div>
+        <div class="pmi-col minus">
+          <h4>Minus (−)</h4>
+          <div id="pmiMinus">
+            <div class="pmi-line" contenteditable="true">Kesihatan mental terjejas</div>
+            <div class="pmi-line" contenteditable="true">Pencapaian akademik terganggu</div>
+          </div>
+          <button class="pmi-add" onclick="addPMI('pmiMinus')">+ Tambah</button>
+        </div>
+        <div class="pmi-col interesting">
+          <h4>Menarik (I)</h4>
+          <div id="pmiInteresting">
+            <div class="pmi-line" contenteditable="true">Kesan bergantung pada cara guna, bukan aplikasinya</div>
+          </div>
+          <button class="pmi-add" onclick="addPMI('pmiInteresting')">+ Tambah</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- AKTIVITI -->
+    <section class="page" id="page-aktiviti">
+      <span class="pill">Aktiviti</span>
+      <h2>Kuiz Rumusan</h2>
+      <p class="lead">Uji kefahaman anda terhadap kemahiran membaca, membuat nota dan berfikir yang telah dipelajari.</p>
+
+      <div class="quiz-q">
+        <div class="qtext">1. Kaedah membaca yang sesuai digunakan untuk mendapat gambaran umum petikan dengan pantas ialah…</div>
+        <label class="quiz-opt"><input type="radio" name="q1"> Membaca teliti</label>
+        <label class="quiz-opt"><input type="radio" name="q1" data-correct="true"> Membaca imbasan</label>
+        <label class="quiz-opt"><input type="radio" name="q1"> Membaca kuat</label>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz-q">
+        <div class="qtext">2. Teknik membuat nota yang menggunakan ruang isyarat, nota dan rumusan secara berasingan ialah…</div>
+        <label class="quiz-opt"><input type="radio" name="q2"> Peta Minda</label>
+        <label class="quiz-opt"><input type="radio" name="q2" data-correct="true"> Kaedah Cornell</label>
+        <label class="quiz-opt"><input type="radio" name="q2"> Akronim</label>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz-q">
+        <div class="qtext">3. Berdasarkan petikan, kesan negatif utama penggunaan media sosial berlebihan ialah…</div>
+        <label class="quiz-opt"><input type="radio" name="q3"> Meningkatkan kemahiran kreatif</label>
+        <label class="quiz-opt"><input type="radio" name="q3" data-correct="true"> Kebimbangan dan gangguan tumpuan</label>
+        <label class="quiz-opt"><input type="radio" name="q3"> Memperluas jaringan sosial</label>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz-q">
+        <div class="qtext">4. Alat berfikir yang menyusun idea kepada tiga bahagian: baik, buruk dan menarik ialah…</div>
+        <label class="quiz-opt"><input type="radio" name="q4"> Peta Buih</label>
+        <label class="quiz-opt"><input type="radio" name="q4" data-correct="true"> PMI</label>
+        <label class="quiz-opt"><input type="radio" name="q4"> Peta Alir</label>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz-q">
+        <div class="qtext">5. Kemahiran berfikir yang digunakan apabila kita mentafsir sebab tersirat di sebalik satu situasi (bukan dinyatakan secara terus) dipanggil…</div>
+        <label class="quiz-opt"><input type="radio" name="q5"> Membanding &amp; membeza</label>
+        <label class="quiz-opt"><input type="radio" name="q5" data-correct="true"> Membuat inferens</label>
+        <label class="quiz-opt"><input type="radio" name="q5"> Meringkas</label>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <button class="btn gold" onclick="markQuiz()">Semak Jawapan</button>
+      <div class="score-box" id="scoreBox">
+        <div class="big" id="scoreText">0 / 5</div>
+        <p id="scoreRemark" style="margin:6px 0 0;color:#C9CFDD;"></p>
+      </div>
+    </section>
+
+    <!-- RUMUSAN -->
+    <section class="page" id="page-rumusan">
+      <span class="pill">Rumusan</span>
+      <h2>Rumusan &amp; Refleksi</h2>
+      <p class="lead">Anda telah melalui tiga topik: kaedah membaca &amp; teknik membuat nota, kemahiran berfikir, dan alat berfikir — semuanya menggunakan satu isu sebenar yang relevan dengan kehidupan anda.</p>
+
+      <div class="two-col">
+        <div class="card">
+          <h3 style="font-size:16px;">Apa yang telah anda kuasai</h3>
+          <p style="font-size:14px;line-height:1.9;">✓ Membaca imbasan &amp; membaca teliti<br>✓ Peta Minda, Kaedah Cornell, Akronim<br>✓ Membanding &amp; membeza, membuat inferens<br>✓ Peta Buih &amp; PMI</p>
+        </div>
+        <div class="card">
+          <h3 style="font-size:16px;">Refleksi Kendiri</h3>
+          <p class="desc">Tulis satu perkara baharu yang anda pelajari dan bagaimana anda akan mengaplikasikannya semasa membaca teks lain.</p>
+          <textarea class="reflect" placeholder="Tulis refleksi anda di sini…"></textarea>
+        </div>
+      </div>
+      <p class="margin-note" style="font-size:22px;margin-top:26px;">✎ Tahniah kerana menyelesaikan modul ini — teruskan berlatih membaca secara aktif!</p>
+    </section>
+
+  </main>
+</div>
+
+<script>
+const pages=['beranda','topik3','topik4','topik5','aktiviti','rumusan'];
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.navlink').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.navlink[data-page="'+id+'"]').classList.add('active');
+  const idx=pages.indexOf(id);
+  document.getElementById('progressFill').style.width=(((idx+1)/pages.length)*100)+'%';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.navlink').forEach(btn=>{
+  btn.addEventListener('click',()=>goPage(btn.dataset.page));
+});
+
+// reading mode
+function setReadMode(mode){
+  const box=document.getElementById('petikanBox');
+  box.classList.remove('mode-imbasan','mode-teliti');
+  box.classList.add('mode-'+mode);
+  document.getElementById('btn-imbasan').classList.toggle('active',mode==='imbasan');
+  document.getElementById('btn-teliti').classList.toggle('active',mode==='teliti');
+}
+function toggleAnnot(el){
+  if(!document.getElementById('petikanBox').classList.contains('mode-teliti')) return;
+  const annot=el.nextElementSibling;
+  if(annot && annot.classList.contains('annot')) annot.classList.toggle('show');
+}
+
+// note tabs
+function setTab(btn,panelId){
+  const tabsWrap=btn.closest('.tabs');
+  tabsWrap.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const panels=['nota-peta','nota-cornell','nota-akronim'];
+  panels.forEach(id=>document.getElementById(id).classList.remove('active'));
+  document.getElementById(panelId).classList.add('active');
+}
+
+// mind map build
+const mmData=[
+  {x:'8%',y:'6%',label:'Definisi',body:'Sebahagian kehidupan harian remaja masa kini.'},
+  {x:'62%',y:'4%',label:'Fungsi',body:'Berhibur, berkongsi idea, jaringan sosial, maklumat semasa.'},
+  {x:'2%',y:'62%',label:'Kesan Negatif',body:'Kebimbangan, gangguan tumpuan, masalah tidur, rasa rendah diri.'},
+  {x:'62%',y:'62%',label:'Kesan Positif',body:'Kandungan pendidikan, komuniti pembelajaran, kemahiran kreatif.'},
+  {x:'32%',y:'82%',label:'Penyelesaian',body:'Keseimbangan &amp; literasi digital.'}
+];
+const mmArea=document.getElementById('mindmapArea');
+mmArea.innerHTML='<div class="mm-center">Kesan Media Sosial</div>';
+mmData.forEach(d=>{
+  const node=document.createElement('div');
+  node.className='mm-node';
+  node.style.left=d.x; node.style.top=d.y;
+  node.innerHTML='<div class="head">'+d.label+'</div><div class="body">'+d.body+'</div>';
+  node.onclick=()=>node.classList.toggle('open');
+  mmArea.appendChild(node);
+});
+
+// sort activity
+function sortChip(el,choice){
+  const answer=el.dataset.answer;
+  el.classList.remove('done-plus','done-minus');
+  if(choice===answer){
+    el.classList.add(choice==='plus'?'done-plus':'done-minus');
+  } else {
+    el.style.borderColor='var(--rust)';
+    setTimeout(()=>{el.style.borderColor='var(--line)';},600);
+  }
+}
+
+// bubble map
+function revealBubble(el,text){
+  el.classList.add('revealed');
+  el.textContent='';
+  el.innerHTML=text;
+}
+
+// PMI add line
+function addPMI(containerId){
+  const div=document.createElement('div');
+  div.className='pmi-line';
+  div.contentEditable='true';
+  document.getElementById(containerId).appendChild(div);
+  div.focus();
+}
+
+// quiz
+function markQuiz(){
+  let score=0;
+  for(let i=1;i<=5;i++){
+    const opts=document.getElementsByName('q'+i);
+    const feedback=opts[0].closest('.quiz-q').querySelector('.quiz-feedback');
+    let picked=null;
+    opts.forEach(o=>{
+      const label=o.closest('.quiz-opt');
+      label.classList.remove('correct','wrong');
+      if(o.checked) picked=o;
+    });
+    opts.forEach(o=>{
+      const label=o.closest('.quiz-opt');
+      if(o.dataset.correct==='true') label.classList.add('correct');
+      else if(o===picked) label.classList.add('wrong');
+    });
+    if(picked && picked.dataset.correct==='true') score++;
+    feedback.textContent = picked ? (picked.dataset.correct==='true' ? 'Betul!' : 'Belum tepat — jawapan betul ditanda hijau.') : 'Anda belum menjawab soalan ini.';
+    feedback.classList.add('show');
+  }
+  document.getElementById('scoreText').textContent=score+' / 5';
+  const remark=document.getElementById('scoreRemark');
+  remark.textContent = score===5?'Cemerlang! Anda menguasai semua kemahiran dalam modul ini.':score>=3?'Bagus! Semak semula bahagian yang tersilap.':'Kembali ke topik berkaitan dan cuba lagi.';
+  document.getElementById('scoreBox').classList.add('show');
+}
+</script>
+</body>
+</html>
